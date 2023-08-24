@@ -1,0 +1,31 @@
+{
+  "name": "vector-gen-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "data.js",
+  "type": "module",
+  "scripts": {
+    "copy-files": "cp -r ./src/images ./dist/",
+    "build": "npx tsc && npm run copy-files",
+    "start": "npm run build && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.10.0",
+    "@tensorflow/tfjs-node": "^4.10.0",
+    "@xenova/transformers": "^2.5.2",
+    "dotenv": "^16.3.1",
+    "jpeg-js": "^0.4.4",
+    "redis": "^4.6.7",
+    "redis-om": "^0.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.2",
+    "concurrently": "^8.2.1",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.1.6"
+  }
+}
