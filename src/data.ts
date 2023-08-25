@@ -1,3 +1,6 @@
+const PRODUCTS_KEY_PREFIX = "Products";
+const PRODUCTS_INDEX_KEY = "Idx:Products";
+
 const products = [
   {
     _id: "1",
@@ -41,4 +44,4 @@ const products = [
   },
 ];
 
-export { products };
+export { products, PRODUCTS_KEY_PREFIX, PRODUCTS_INDEX_KEY };
