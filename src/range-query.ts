@@ -3,40 +3,34 @@ import { generateSentenceEmbeddings } from "./text-vector-gen.js";
 import { PRODUCTS_INDEX_KEY } from "./data.js";
 import { float32Buffer, getVectorForRedisInsight } from "./misc.js";
 
-
-const queryProductDescriptionEmbeddingsByKNN = async (_searchTxt, _resultCount) => {
-
-    //A KNN query will give us the top n documents that best match the query vector.
-
+const queryProductDescriptionEmbeddingsByRange = async (_searchTxt, _range) => {
     /*  sample raw query
+   
+       FT.SEARCH idx:products
+       "@productDescriptionEmbeddings:[VECTOR_RANGE $searchRange $searchBlob]=>{$YIELD_DISTANCE_AS: score}"
+       RETURN 4 score brandName productDisplayName imageURL 
+       SORTBY score 
+       PARAMS 4 searchRange 0.685 searchBlob "A=\xe1\xbb\x8a\xad\x...."
+       DIALECT 2
+       */
 
-        FT.SEARCH idx:products
-        "*=>[KNN 5 @productDescriptionEmbeddings $searchBlob AS score]" 
-        RETURN 4 score brandName productDisplayName imageURL 
-        SORTBY score 
-        PARAMS 2 searchBlob "6\xf7\..." 
-        DIALECT 2 
-
-    */
-    //https://redis.io/docs/interact/search-and-query/query/
-
-
-    console.log(`queryProductDescriptionEmbeddingsByKNN started`);
+    console.log(`queryProductDescriptionEmbeddingsByRange started`);
     let results = {};
     if (_searchTxt) {
 
-        _resultCount = _resultCount ?? 5;
+        _range = _range ?? 1.0;
 
         const nodeRedisClient = getNodeRedisClient();
+
         const searchTxtVectorArr = await generateSentenceEmbeddings(_searchTxt);
 
         const searchQuery =
-            `*=>[KNN ${_resultCount} @productDescriptionEmbeddings $searchBlob AS score]`;
+            "@productDescriptionEmbeddings:[VECTOR_RANGE $searchRange $searchBlob]=>{$YIELD_DISTANCE_AS: score}";
 
-        //console.log(getVectorForRedisInsight(searchTxtVectorArr));
         results = await nodeRedisClient.ft.search(PRODUCTS_INDEX_KEY, searchQuery, {
             PARAMS: {
-                "searchBlob": float32Buffer(searchTxtVectorArr)
+                "searchBlob": float32Buffer(searchTxtVectorArr),
+                "searchRange": _range
             },
             RETURN: ["score", "brandName", "productDisplayName", "imageURL"],
             SORTBY: {
@@ -54,5 +48,5 @@ const queryProductDescriptionEmbeddingsByKNN = async (_searchTxt, _resultCount) 
 }
 
 export {
-    queryProductDescriptionEmbeddingsByKNN
+    queryProductDescriptionEmbeddingsByRange
 }

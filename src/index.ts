@@ -6,7 +6,7 @@ import { generateSentenceEmbeddings } from "./text-vector-gen.js";
 import { generateImageEmbeddings } from "./image-vector-gen.js";
 import { createRedisIndex } from "./redis-index.js"
 import { queryProductDescriptionEmbeddingsByKNN } from "./knn-query.js";
-
+import { queryProductDescriptionEmbeddingsByRange } from "./range-query.js"
 import { setRedis, getNodeRedisClient } from './utils/redis/redis-wrapper.js';
 
 dotenv.config();
@@ -52,18 +52,21 @@ async function testVectorGeneration() {
     console.log(imageEmbeddings);
 }
 
-async function testVectorQueryByKNN() {
+async function testVectorQueryByKNNandRange() {
     const result = await queryProductDescriptionEmbeddingsByKNN("Puma watch with cat", 3);
     console.log(JSON.stringify(result, null, 4));
+
+    const result2 = await queryProductDescriptionEmbeddingsByRange("Puma watch with cat", 1.0);
+    console.log(JSON.stringify(result2, null, 4));
 }
 async function init() {
 
     await setRedis(REDIS_URI);
-    // await createRedisIndex();
-    // await addProductWithEmbeddings(products);
+    await createRedisIndex();
+    await addProductWithEmbeddings(products);
 
     //await testVectorGeneration();
-    await testVectorQueryByKNN(); //TODO: API ?
+    await testVectorQueryByKNNandRange();
 
     process.exit(0);
 }
