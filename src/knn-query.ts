@@ -31,7 +31,7 @@ const queryProductDescriptionEmbeddingsByKNN = async (_searchTxt, _resultCount) 
 
     /*  sample raw query
 
-        FT.SEARCH Idx:Products
+        FT.SEARCH idx:products
         "*=>[KNN 5 @productDescriptionEmbeddings $searchBlob AS score]" 
         RETURN 4 score brandName productDisplayName imageURL 
         SORTBY score 

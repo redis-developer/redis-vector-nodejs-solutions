@@ -5,11 +5,11 @@ import { getNodeRedisClient, SchemaFieldTypes, VectorAlgorithms } from './utils/
 
 const createRedisIndex = async () => {
     /*    (RAW COMMAND)
-          FT.DROPINDEX Idx:Products
+          FT.DROPINDEX idx:products
           
-          FT.CREATE Idx:Products
+          FT.CREATE idx:products
           ON JSON
-              PREFIX 1 "Products:"
+              PREFIX 1 "products:"
           SCHEMA
           "$.productDisplayName" as productDisplayName TEXT NOSTEM SORTABLE
           "$.brandName" as brandName TEXT NOSTEM SORTABLE

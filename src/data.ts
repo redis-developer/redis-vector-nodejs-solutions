@@ -1,5 +1,5 @@
-const PRODUCTS_KEY_PREFIX = "Products";
-const PRODUCTS_INDEX_KEY = "Idx:Products";
+const PRODUCTS_KEY_PREFIX = "products";
+const PRODUCTS_INDEX_KEY = "idx:products";
 
 const products = [
   {

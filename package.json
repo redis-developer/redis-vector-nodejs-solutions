@@ -17,6 +17,7 @@
     "@tensorflow/tfjs": "^4.10.0",
     "@tensorflow/tfjs-node": "^4.10.0",
     "@xenova/transformers": "^2.5.2",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.3.1",
     "jpeg-js": "^0.4.4",
     "redis": "^4.6.7",

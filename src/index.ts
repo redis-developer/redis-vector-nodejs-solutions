@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import * as cheerio from 'cheerio';
 
 import { products, PRODUCTS_KEY_PREFIX } from "./data.js";
 import { generateSentenceEmbeddings } from "./text-vector-gen.js";
@@ -14,6 +15,11 @@ dotenv.config();
 const REDIS_URI = process.env.REDIS_URI || "";
 //--- config ends
 
+function stripHTML(htmlContent) {
+    const $ = cheerio.load(htmlContent);
+    return $.text();
+}
+
 async function addProductWithEmbeddings(_products) {
     const nodeRedisClient = getNodeRedisClient();
 
@@ -21,12 +27,14 @@ async function addProductWithEmbeddings(_products) {
         for (let product of _products) {
 
             console.log(`generating description embeddings for product ${product._id}`);
-            const sentenceEmbedding = await generateSentenceEmbeddings(product.productDescription);
+            const strippedText = stripHTML(product.productDescription);
+            product["productDescription"] = strippedText;
+            const sentenceEmbedding = await generateSentenceEmbeddings(strippedText);
             product["productDescriptionEmbeddings"] = sentenceEmbedding;
 
-            console.log(`generating image embeddings for product ${product._id}`);
-            const imageEmbedding = await generateImageEmbeddings(product.imageURL);
-            product["productImageEmbeddings"] = imageEmbedding;
+            // console.log(`generating image embeddings for product ${product._id}`);
+            // const imageEmbedding = await generateImageEmbeddings(product.imageURL);
+            // product["productImageEmbeddings"] = imageEmbedding;
 
             await nodeRedisClient.json.set(`${PRODUCTS_KEY_PREFIX}:${product._id}`, "$", {
                 ...product
@@ -45,19 +53,22 @@ async function testVectorGeneration() {
 }
 
 async function testVectorQueryByKNN() {
-    const result = await queryProductDescriptionEmbeddingsByKNN("watch", 3);
+    const result = await queryProductDescriptionEmbeddingsByKNN("Puma watch with cat", 3);
     console.log(JSON.stringify(result, null, 4));
 }
 async function init() {
 
     await setRedis(REDIS_URI);
-    await createRedisIndex();
-    await addProductWithEmbeddings(products);
+    // await createRedisIndex();
+    // await addProductWithEmbeddings(products);
 
     //await testVectorGeneration();
-    //await testVectorQueryByKNN();
+    await testVectorQueryByKNN(); //TODO: API ?
 
     process.exit(0);
 }
 
 init();
+
+
+//TODO: write vector queries to file -  logs/01-json-data.log, logs/02-index.log , logs/03-knn-query.log
