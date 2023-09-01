@@ -5,7 +5,10 @@ import { products, PRODUCTS_KEY_PREFIX } from "./data.js";
 import { generateSentenceEmbeddings } from "./text-vector-gen.js";
 import { generateImageEmbeddings } from "./image-vector-gen.js";
 import { createRedisIndex } from "./redis-index.js"
-import { queryProductDescriptionEmbeddingsByKNN } from "./knn-query.js";
+import {
+    queryProductDescriptionEmbeddingsByKNN,
+    queryProductImageEmbeddingsByKNN
+} from "./knn-query.js";
 import { queryProductDescriptionEmbeddingsByRange } from "./range-query.js"
 import { setRedis, getNodeRedisClient } from './utils/redis/redis-wrapper.js';
 
@@ -32,9 +35,9 @@ async function addProductWithEmbeddings(_products) {
             const sentenceEmbedding = await generateSentenceEmbeddings(strippedText);
             product["productDescriptionEmbeddings"] = sentenceEmbedding;
 
-            // console.log(`generating image embeddings for product ${product._id}`);
-            // const imageEmbedding = await generateImageEmbeddings(product.imageURL);
-            // product["productImageEmbeddings"] = imageEmbedding;
+            console.log(`generating image embeddings for product ${product._id}`);
+            const imageEmbedding = await generateImageEmbeddings(product.imageURL);
+            product["productImageEmbeddings"] = imageEmbedding;
 
             await nodeRedisClient.json.set(`${PRODUCTS_KEY_PREFIX}:${product._id}`, "$", {
                 ...product
@@ -52,13 +55,19 @@ async function testVectorGeneration() {
     console.log(imageEmbeddings);
 }
 
-async function testVectorQueryByKNNandRange() {
+async function testVectorQueryByKNNandRangeForText() {
     const result = await queryProductDescriptionEmbeddingsByKNN("Puma watch with cat", 3);
     console.log(JSON.stringify(result, null, 4));
 
     const result2 = await queryProductDescriptionEmbeddingsByRange("Puma watch with cat", 1.0);
     console.log(JSON.stringify(result2, null, 4));
 }
+
+async function testVectorQueryByKNNandRangeForImage() {
+    const result = await queryProductImageEmbeddingsByKNN("images/11001.jpg", 3);
+    console.log(JSON.stringify(result, null, 4));
+}
+
 async function init() {
 
     await setRedis(REDIS_URI);
@@ -66,12 +75,11 @@ async function init() {
     await addProductWithEmbeddings(products);
 
     //await testVectorGeneration();
-    await testVectorQueryByKNNandRange();
+    await testVectorQueryByKNNandRangeForText();
+    //await testVectorQueryByKNNandRangeForImage();
 
     process.exit(0);
 }
 
 init();
 
-
-//TODO: write vector queries to file -  logs/01-json-data.log, logs/02-index.log , logs/03-knn-query.log

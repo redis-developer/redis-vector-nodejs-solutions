@@ -25,19 +25,21 @@ async function generateImageEmbeddings(imagePath: string) {
     // Load MobileNet model
     const model = await mobilenet.load();
 
+    // Preprocess the image and get the intermediate activation.
+    const activation = model.infer(imageTensor, true);
+
     //to check properly classifying image
     const prediction = await model.classify(imageTensor);
     console.log(`${imagePath} prediction`, prediction);
 
-    // Preprocess the image and get the intermediate activation.
-    const activation = model.infer(imageTensor, true);
-
     // Convert the tensor to a regular array.
     const vectorOutput = await activation.data();
 
-    imageTensor.dispose();  // Clean up tensor
+    //imageTensor.dispose();  // Clean up tensor
 
-    return vectorOutput;//DIM 1024
+    const imageEmbeddings: number[] = Array.from(vectorOutput);
+
+    return imageEmbeddings;//DIM 1024
 }
 
 export {
